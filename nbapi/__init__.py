@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
-import io
-from typing import Any
+from typing import Any, Dict, List, Optional
 import nbformat
 from nbclient import NotebookClient
-import json
 import re
 import requests
 
@@ -15,10 +13,10 @@ DataType = str
 @dataclass_json
 @dataclass
 class Value:
-    input: str | None = None
-    constant: str | None = None
+    input: Optional[str] = None
+    constant: Optional[str] = None
 
-    def resolve(self, input: dict[str, str]) -> str:
+    def resolve(self, input: Dict[str, str]) -> str:
         if self.constant:
             return self.constant
         elif self.input:
@@ -35,17 +33,17 @@ class Artifact:
 @dataclass_json
 @dataclass
 class Stage:
-    vars: dict[str, Value] # map of input key to colab param ident
-    cell_id: str | None = None
-    source: str | None = None
+    vars: Dict[str, Value] # map of input key to colab param ident
+    cell_id: Optional[str] = None
+    source: Optional[str] = None
 
 @dataclass_json
 @dataclass
 class Service:
     url: str
-    input: dict[str, DataType]
-    output: dict[str, Artifact]
-    plan: list[Stage]
+    input: Dict[str, DataType]
+    output: Dict[str, Artifact]
+    plan: List[Stage]
 
 async def parse(nb_url: str) -> Service:
     source = requests.get(nb_url).text
@@ -60,7 +58,7 @@ async def parse(nb_url: str) -> Service:
             plan.append(Stage(cell_vars, cell_id=id, source=None))
     return Service(nb_url, input={}, output={}, plan=plan)
 
-async def exec(service: Service, input: dict[str, dict[str, str]]):
+async def exec(service: Service, input: Dict[str, Dict[str, str]]):
     source = requests.get(service.url).text
     nb = nbformat.reads(source, as_version=nbformat.NO_CONVERT)
     cells = {}
@@ -84,7 +82,7 @@ async def exec(service: Service, input: dict[str, dict[str, str]]):
                 source = _insert_vars_in_source(stage.source, stage.vars, input)
                 await client.kc.execute(source)
 
-def _parse_cell_vars(cell) -> dict[str, Value] | None:
+def _parse_cell_vars(cell) -> Optional[Dict[str, Value]]:
     vars = {}
     source = cell["source"] if "source" in cell else ""
     for line in source.splitlines():
@@ -96,7 +94,7 @@ def _parse_cell_vars(cell) -> dict[str, Value] | None:
 
     return vars
 
-def _parse_cell_id(cell) -> str | None:
+def _parse_cell_id(cell) -> Optional[str]:
     if not "metadata" in cell:
         return None
     metadata = cell["metadata"]
@@ -104,15 +102,15 @@ def _parse_cell_id(cell) -> str | None:
         return None
     return metadata["id"]
 
-def _insert_vars_in_cell(cell: dict[str, str], vars: dict[str, Value], input: dict[str, str]):
+def _insert_vars_in_cell(cell: Dict[str, str], vars: Dict[str, Value], input: Dict[str, str]):
     source = cell["source"] if "source" in cell else ""
     cell["source"] = _insert_vars_in_source(source, vars, input)
 
-def _insert_vars_in_source(source: str, vars: dict[str, Value], input: dict[str, str]):
+def _insert_vars_in_source(source: str, vars: Dict[str, Value], input: Dict[str, str]):
     lines = list(_insert_vars_in_line(line, vars, input) for line in source.splitlines())
     return "\n".join(lines)
 
-def _insert_vars_in_line(line: str, vars: dict[str, Value], input: dict[str, str]):
+def _insert_vars_in_line(line: str, vars: Dict[str, Value], input: Dict[str, str]):
     if PARAM_QUERY.match(line) == None:
         return line
     parts = re.split(PARAM_QUERY, line)
