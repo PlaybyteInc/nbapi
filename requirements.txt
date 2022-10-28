@@ -1,0 +1,5 @@
+nbformat>=5.0
+nbclient>=0.7
+ipykernel
+requests
+dataclasses-json>=0.5

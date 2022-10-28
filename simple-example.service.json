@@ -1,0 +1,28 @@
+{
+    "input": {
+        "name": {
+            "type": "string"
+        }
+    },
+    "output": {
+        "hello": {
+            "path": "hello.txt",
+            "mimetype": "text/plain"
+        }
+    },
+    "plan": [
+        {
+            "cell_id": "JCIu_Ce2IuZw",
+            "vars": {
+                "name": {
+                    "input": "name"
+                }
+            }
+        },
+        {
+            "cell_id": "vVryz-obJart",
+            "vars": {}
+        }
+    ],
+    "url": "https://gist.githubusercontent.com/samnm/df213c5ae4ddc6f5fdaba5e61ba1d877/raw/41d7b81416b61f9e9a8baf479330ce0448d1a727/simple.ipynb"
+}

@@ -1,0 +1,65 @@
+{
+    "input": {
+        "huggingface_token": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "image_folder_url": {
+            "type": "string"
+        },
+        "fp16": {
+            "type": "boolean",
+            "default": true
+        },
+        "training_steps": {
+            "type": "integer",
+            "default": 1500
+        },
+        "seed": {
+            "type": "number",
+            "default": 96576
+        }
+    },
+    "output": {
+        "weights": {
+            "path": "",
+            "type": "binary"
+        }
+    },
+    "plan": [
+        {
+            "source": "image_folder_url = \"\" @param {type=\"string\"}\nclass_name = \"\" @param {type=\"string\"}\n# download all the images at image_folder_url to /content/images\n# rename all images to `$class_name_$i.jpg`",
+            "vars": {
+                "image_folder_url": { "input": "image_folder_url" },
+                "class_name": { "input": "name" }
+            }
+        },
+        {
+            "cell_id": "O3KHGKqyeJp9",
+            "vars": {
+                "Huggingface_Token": { "input": "huggingface_token" }
+            }
+        },
+        {
+            "cell_id": "A1B299g-_VJo",
+            "source": null,
+            "vars": {
+                "IMAGES_FOLDER_OPTIONAL": { "constant": "/content/images" },
+                "Session_Name": { "input": "name" },
+                "Use_New_Fast_Method": "\"Yes\""
+            }
+        },
+        {
+            "cell_id": "1-9QbkfAVYYU",
+            "source": null,
+            "vars": {
+                "Seed": { "input": "seed" },
+                "Training_Steps": { "input": "training_steps" },
+                "fp16": { "input": "fp16" }
+            }
+        }
+    ],
+    "url": "https://raw.githubusercontent.com/TheLastBen/fast-stable-diffusion/0922ada6d793bebdb9f10ccccc8ea647bf4379c5/fast-DreamBooth.ipynb"
+}
