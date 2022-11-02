@@ -28,7 +28,7 @@ class Value:
 @dataclass
 class Artifact:
     path: str
-    mimetype: str
+    mimetype: Optional[str] = None
 
 @dataclass_json
 @dataclass
