@@ -74,6 +74,7 @@ async def exec(service: Service, input: Dict[str, Dict[str, str]]):
     client = NotebookClient(nb)
     async with client.async_setup_kernel():
         for stage in service.plan:
+            print("Executing {stage.cell_id}")
             if stage.cell_id:
                 cell = cells[stage.cell_id]
                 _insert_vars_in_cell(cell, stage.vars, input)
