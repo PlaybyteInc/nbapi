@@ -5,6 +5,8 @@ import nbformat
 from nbclient import NotebookClient
 import re
 import requests
+import logging
+import sys
 
 PARAM_QUERY = re.compile('^[ \t]*([a-z_\-\d]+)[ \t]*=[ \t]*([^#\s]+)[ \t]*#[ \t]*@param[ \t]*(.+)', re.IGNORECASE)
 
@@ -71,9 +73,16 @@ async def exec(service: Service, input: Dict[str, Dict[str, str]]):
             cells[id] = cell
             indicies[id] = index
 
+    logger = logging.getLogger('')
+    logger.setLevel(logging.DEBUG)
+    sh = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s [%(filename)s.%(funcName)s:%(lineno)d] %(message)s', datefmt='%a, %d %b %Y %H:%M:%S')
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
+
     client = NotebookClient(nb)
+    client.log = logger
     async with client.async_setup_kernel():
-        client.kc.start_channels()
         for stage in service.plan:
             if stage.cell_id:
                 cell = cells[stage.cell_id]
