@@ -8,7 +8,7 @@ async def main():
     # then execute a service with input
     service = nbapi.Service.from_json(open("simple-example.service.json", 'r').read())
     await nbapi.exec(service, {
-        "name": "'world'"
+        "name": "world"
     })
 
 asyncio.run(main())

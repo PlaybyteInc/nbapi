@@ -125,6 +125,31 @@ def _insert_vars_in_line(line: str, vars: Dict[str, Value], input: Dict[str, str
         return line
     parts = re.split(PARAM_QUERY, line)
     [prefix, varname, value, info, suffix] = parts
+
     if varname in vars:
         value = vars[varname].resolve(input)
+        decoded_info = decode_info(info)
+        if "type" in decoded_info and decoded_info["type"] == "string":
+            value = f'"{value}"'
     return f'{prefix}{varname} = {value} #@param {info}{suffix}'
+
+# Converts the string '{type: "<type>"}' to a dict
+def decode_info(info: str):
+    # We can't treat info as json because the keys are not quoted
+    # so we need to do some string manipulation
+    if info == None or info == "":
+        return None
+    if info[0] == "{" and info[-1] == "}":
+        info = info[1:-1]
+    info_dict = {}
+    for key_value in info.split(","):
+        key_value = key_value.strip()
+        if key_value == "":
+            continue
+        [key, value] = key_value.split(":")
+        key = key.strip()
+        value = value.strip()
+        if value[0] == '"' and value[-1] == '"':
+            value = value[1:-1]
+        info_dict[key] = value
+    return info_dict
